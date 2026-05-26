@@ -1,7 +1,8 @@
 # cupid music player
 
 A pixel-art desktop music player built with Electron, Vite, and React.
-
+## Ronan's Intent
+This fork is of the orginal inspiration for my project. I think it would be a good idea to try to remake/modify this, both code and art, to see what I like for my project.
 ## Features
 
 - Pixel-art UI with animated record player, spinning vinyl, and needle
