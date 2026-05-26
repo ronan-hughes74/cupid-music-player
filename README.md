@@ -16,6 +16,106 @@ This fork is of the orginal inspiration for my project. I think it would be a go
 - Local MP3 playback
 - Custom frameless window with drag and resize
 - Dynamic dock/taskbar icon that matches the active theme
+### [Diagram](https://gitdiagram.com/ronan-hughes74/cupid-music-player) 
+``` mermaid
+flowchart TD
+
+subgraph group_desktop_shell["Desktop Shell"]
+  node_electron_main["Main Process<br/>electron shell<br/>[main.cjs]"]
+  node_electron_preload["Preload Bridge<br/>ipc bridge<br/>[preload.cjs]"]
+end
+
+subgraph group_renderer_ui["Renderer UI"]
+  node_app_boot["App Boot<br/>react entry<br/>[main.jsx]"]
+  node_app_shell["App Shell<br/>react composer<br/>[App.jsx]"]
+  node_theme(("Theme State<br/>ui theme hook<br/>[useTheme.js]"))
+end
+
+subgraph group_providers["Provider Adapters"]
+  node_audio_player(("Audio Player<br/>HTML5 audio hook<br/>[useAudioPlayer.js]"))
+  node_spotify_flow(("Spotify Flow<br/>player flow"))
+  node_spotify_auth["Spotify Auth<br/>oauth pkce<br/>[auth.js]"]
+  node_spotify_api["Spotify API<br/>metadata api<br/>[api.js]"]
+  node_apple_auth["Apple Auth<br/>music kit auth<br/>[auth.js]"]
+  node_apple_api["Apple API<br/>library api<br/>[api.js]"]
+  node_youtube_entry["YouTube Entry<br/>provider entry<br/>[index.js]"]
+  node_youtube_auth["YouTube Auth<br/>oauth flow<br/>[auth.js]"]
+  node_youtube_api["YouTube API<br/>data api<br/>[api.js]"]
+end
+
+subgraph group_assets["Assets"]
+  node_playlist_data["Playlist Data<br/>local library<br/>[playlist.json]"]
+  node_art_assets["Artwork & Animations<br/>visual assets"]
+end
+
+subgraph group_build["Build & Config"]
+  node_install_yt_dlp["Install yt-dlp<br/>install script<br/>[install-yt-dlp.cjs]"]
+  node_vite_config["Vite Config<br/>build config<br/>[vite.config.js]"]
+end
+
+subgraph group_external["External Services"]
+  node_yt_dlp["yt-dlp<br/>runtime tool"]
+  node_spotify_web["Spotify Web API<br/>external api"]
+  node_apple_musickit["Apple MusicKit<br/>external api"]
+  node_youtube_data["YouTube Data API<br/>external api"]
+end
+
+node_app_boot -->|"mounts"| node_app_shell
+node_app_shell -->|"controls"| node_audio_player
+node_app_shell -->|"themes"| node_theme
+node_app_shell -->|"spotify ui"| node_spotify_flow
+node_app_shell -->|"apple ui"| node_apple_api
+node_app_shell -->|"youtube ui"| node_youtube_entry
+node_app_shell -->|"local library"| node_playlist_data
+node_app_shell -->|"renders"| node_art_assets
+node_spotify_flow -->|"auth"| node_spotify_auth
+node_spotify_flow -->|"fetches"| node_spotify_api
+node_spotify_api -->|"calls"| node_spotify_web
+node_apple_api -->|"auth"| node_apple_auth
+node_apple_auth -->|"calls"| node_apple_musickit
+node_youtube_entry -->|"auth"| node_youtube_auth
+node_youtube_entry -->|"fetches"| node_youtube_api
+node_youtube_api -->|"calls"| node_youtube_data
+node_audio_player -->|"resolves"| node_yt_dlp
+node_electron_main -->|"bridges"| node_electron_preload
+node_electron_preload -->|"ipc"| node_app_shell
+node_electron_main -->|"bundles"| node_install_yt_dlp
+node_vite_config -->|"builds"| node_app_boot
+node_electron_main -.->|"theme icon"| node_art_assets
+
+click node_electron_main "https://github.com/ronan-hughes74/cupid-music-player/blob/main/electron/main.cjs"
+click node_electron_preload "https://github.com/ronan-hughes74/cupid-music-player/blob/main/electron/preload.cjs"
+click node_app_boot "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/main.jsx"
+click node_app_shell "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/App.jsx"
+click node_audio_player "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/useAudioPlayer.js"
+click node_theme "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/useTheme.js"
+click node_spotify_flow "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/useSpotifyPlayer.js"
+click node_spotify_auth "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/spotify/auth.js"
+click node_spotify_api "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/spotify/api.js"
+click node_apple_auth "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/apple/auth.js"
+click node_apple_api "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/apple/api.js"
+click node_youtube_entry "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/youtube/index.js"
+click node_youtube_auth "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/youtube/auth.js"
+click node_youtube_api "https://github.com/ronan-hughes74/cupid-music-player/blob/main/src/youtube/api.js"
+click node_playlist_data "https://github.com/ronan-hughes74/cupid-music-player/blob/main/audio/playlist.json"
+click node_art_assets "https://github.com/ronan-hughes74/cupid-music-player/tree/main/assets"
+click node_install_yt_dlp "https://github.com/ronan-hughes74/cupid-music-player/blob/main/scripts/install-yt-dlp.cjs"
+click node_vite_config "https://github.com/ronan-hughes74/cupid-music-player/blob/main/vite.config.js"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
+classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
+class node_electron_main,node_electron_preload toneBlue
+class node_app_boot,node_app_shell,node_theme toneAmber
+class node_audio_player,node_spotify_flow,node_spotify_auth,node_spotify_api,node_apple_auth,node_apple_api,node_youtube_entry,node_youtube_auth,node_youtube_api toneMint
+class node_playlist_data,node_art_assets toneRose
+class node_install_yt_dlp,node_vite_config toneIndigo
+class node_yt_dlp,node_spotify_web,node_apple_musickit,node_youtube_data toneTeal
+```
 
 ## Getting Started
 You only need 4 commands. Copy them one at a time:
